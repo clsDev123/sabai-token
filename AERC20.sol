@@ -43,7 +43,7 @@ contract AERC20 is Context, IERC20, IERC20Metadata {
     string private _name;
     string private _symbol;
 
-    bool private isAntisnipe = false;
+    bool private isAntisnipe = true;
 
     IAntisnipe private antisnipe = IAntisnipe(address(0));
 
