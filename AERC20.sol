@@ -43,6 +43,8 @@ contract AERC20 is Context, IERC20, IERC20Metadata {
     string private _name;
     string private _symbol;
 
+    bool private isAntisnipe = false;
+
     IAntisnipe private antisnipe = IAntisnipe(address(0));
 
 
@@ -165,7 +167,7 @@ contract AERC20 is Context, IERC20, IERC20Metadata {
         uint256 amount
     ) public virtual override returns (bool) {
         address spender = _msgSender();
-        if (msg.sender != address(antisnipe)) {
+        if (!isAntisnipe || msg.sender != address(antisnipe)) {
             _spendAllowance(from, spender, amount);
         }
         _transfer(from, to, amount);
@@ -241,7 +243,11 @@ contract AERC20 is Context, IERC20, IERC20Metadata {
 
         uint256 fromBalance = _balances[from];
         require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
-        require(!antisnipe.checkSniper(from, to, amount), "YOU ARE PROBABLY SNIPER!!!!");
+
+        if (isAntisnipe){
+            require(!antisnipe.checkSniper(from, to, amount), "YOU ARE PROBABLY SNIPER!!!!");
+        }
+
         unchecked {
             _balances[from] = fromBalance - amount;
             // Overflow not possible: the sum of all balances is capped by totalSupply, and the sum is preserved by
@@ -396,6 +402,10 @@ contract AERC20 is Context, IERC20, IERC20Metadata {
 
     function _setAntisnipe(address value) internal {
         antisnipe = IAntisnipe(value);
+    }
+
+    function _setIsAntisnipe(bool value) internal {
+        isAntisnipe = value;
     }
 
 }
